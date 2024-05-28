@@ -1,1 +1,2 @@
-# game-college
+# Tik Tak Toe C++
+The "Tik Tak Toe" game project in C++ implements the classic "Tic Tac Toe" game for two players. The game uses a 3x3 two-dimensional array for the game board. Players take turns entering their moves through the command line, selecting positions on the board. After each move, the game checks for a winner or a draw. The game ends when one player fills three consecutive cells horizontally, vertically, or diagonally, or when all cells are filled without determining a winner.
