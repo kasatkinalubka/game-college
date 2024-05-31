@@ -11,11 +11,7 @@ This project implements a simple **Tic-Tac-Toe** game in C++ for two players, X 
 
 ## Code Examples
 
-### Score Structure
+![image](https://github.com/kasatkinalubka/game-college/assets/157211954/51e00a52-e154-4f02-a13c-4f0e7b57683e)
 
 
-struct Score {
-    int xWins;
-    int oWins;
-    int draws;
-};
+
