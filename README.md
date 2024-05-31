@@ -4,10 +4,10 @@ This project implements a simple **Tic-Tac-Toe** game in C++ for two players, X 
 
 ## Features
 
-- **Board Display**: Shows the current state of the board.
-- **Player Moves**: Players input their moves by selecting a row and column.
-- **Winner and Draw Checks**: Determines if a player has won or if the game is a draw.
-- **Score Tracking**: Reads and writes win-draw statistics from/to a file.
+- **Board Display**: shows the current state of the board.
+- **Player Moves**: players input their moves by selecting a row and column.
+- **Winner and Draw Checks**: determines if a player has won or if the game is a draw.
+- **Score Tracking**: reads and writes win-draw statistics from/to a file.
 
 ## Code Examples
 ## Reading Score from File
