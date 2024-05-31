@@ -1,2 +1,21 @@
-# Tik Tak Toe C++
-The "Tik Tak Toe" game project in C++ implements the classic "Tic Tac Toe" game for two players. The game uses a 3x3 two-dimensional array for the game board. Players take turns entering their moves through the command line, selecting positions on the board. After each move, the game checks for a winner or a draw. The game ends when one player fills three consecutive cells horizontally, vertically, or diagonally, or when all cells are filled without determining a winner.
+# Tic-Tac-Toe in C++
+
+This project implements a simple **Tic-Tac-Toe** game in C++ for two players, X and O, who take turns placing their marks on a 3x3 grid. The game checks for a winner after each move by evaluating rows, columns, and diagonals. If the board is filled without a winner, the game ends in a draw. The results, including wins for each player and draws, are recorded in a file to keep track of the game history.
+
+## Features
+
+- **Board Display**: Shows the current state of the board.
+- **Player Moves**: Players input their moves by selecting a row and column.
+- **Winner and Draw Checks**: Determines if a player has won or if the game is a draw.
+- **Score Tracking**: Reads and writes win-draw statistics from/to a file.
+
+## Code Examples
+
+### Score Structure
+
+
+struct Score {
+    int xWins;
+    int oWins;
+    int draws;
+};
