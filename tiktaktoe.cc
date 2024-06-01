@@ -1,20 +1,25 @@
 #include <iostream>
 #include <fstream>
 #include <string>
+#include <ctime>
+#include <iomanip>
+#include <json/json.h>// и хде оно его должно взять? там ниже есть у меня, ко чат гпт писал
 
 using namespace std;
-
-// Розмір дошки
+#pragma warning(disable : 4996)
+// Board size
 const int SIZE = 3;
+const char PLAYER_X = 'X';
+const char PLAYER_O = 'O';
 
-// Структура для зберігання історії перемог
+// Structure to store win history
 struct Score {
     int xWins;
     int oWins;
     int draws;
 };
 
-// Функція для зчитування історії перемог з файлу
+// Function to read win history from a file
 Score readScoreFromFile(const string& filename) {
     ifstream file(filename);
     Score score = { 0, 0, 0 };
@@ -27,7 +32,7 @@ Score readScoreFromFile(const string& filename) {
     return score;
 }
 
-// Функція для запису історії перемог у файл
+// Function to write win history to a file
 void writeScoreToFile(const string& filename, const Score& score) {
     ofstream file(filename);
 
@@ -37,7 +42,39 @@ void writeScoreToFile(const string& filename, const Score& score) {
     }
 }
 
-// Функція для відображення дошки
+// Function to read win history from a JSON file
+Score readScoreFromJson(const string& filename) {
+    ifstream file(filename);
+    Score score = { 0, 0, 0 };
+
+    if (file.is_open()) {
+        Json::Value root;
+        file >> root;
+        score.xWins = root["wins"]["X"].asInt();
+        score.oWins = root["wins"]["O"].asInt();
+        score.draws = root["wins"]["draws"].asInt();
+        file.close();
+    }
+
+    return score;
+}
+
+// Function to write win history to a JSON file
+void writeScoreToJson(const string& filename, const Score& score) {
+    ofstream file(filename);
+
+    if (file.is_open()) {
+        Json::Value root;
+        root["wins"]["X"] = score.xWins;
+        root["wins"]["O"] = score.oWins;
+        root["wins"]["draws"] = score.draws;
+
+        file << root;
+        file.close();
+    }
+}
+
+// Function to display the board
 void displayBoard(char board[SIZE][SIZE]) {
     for (int i = 0; i < SIZE; ++i) {
         for (int j = 0; j < SIZE; ++j) {
@@ -49,9 +86,9 @@ void displayBoard(char board[SIZE][SIZE]) {
     }
 }
 
-// Функція для перевірки переможця
+// Function to check the winner
 char checkWinner(char board[SIZE][SIZE]) {
-    // Перевірка рядків і стовпців
+    // Check rows and columns
     for (int i = 0; i < SIZE; ++i) {
         if (board[i][0] == board[i][1] && board[i][1] == board[i][2] && board[i][0] != ' ') {
             return board[i][0];
@@ -60,18 +97,18 @@ char checkWinner(char board[SIZE][SIZE]) {
             return board[0][i];
         }
     }
-    // Перевірка діагоналей
+    // Check diagonals
     if (board[0][0] == board[1][1] && board[1][1] == board[2][2] && board[0][0] != ' ') {
         return board[0][0];
     }
     if (board[0][2] == board[1][1] && board[1][1] == board[2][0] && board[0][2] != ' ') {
         return board[0][2];
     }
-    // Нічия
+    // No winner
     return ' ';
 }
 
-// Функція для перевірки, чи залишилися пусті клітинки
+// Function to check if the board is full
 bool isBoardFull(char board[SIZE][SIZE]) {
     for (int i = 0; i < SIZE; ++i) {
         for (int j = 0; j < SIZE; ++j) {
@@ -83,69 +120,110 @@ bool isBoardFull(char board[SIZE][SIZE]) {
     return true;
 }
 
+// Function to validate a move
+bool isValidMove(int row, int col, char board[SIZE][SIZE]) {
+    return row >= 0 && row < SIZE && col >= 0 && col < SIZE && board[row][col] == ' ';
+}
+
+// Function to get the current timestamp as a string
+string currentTimestamp() {
+    auto t = time(nullptr);
+    auto tm = localtime(&t);
+    ostringstream oss;
+    oss << put_time(tm, "%Y-%m-%d %H:%M:%S");
+    return oss.str();
+}
+
+// Function to write logs to a file
+void logToFile(const string& filename, const string& message) {
+    ofstream file(filename, ios::app);
+
+    if (file.is_open()) {
+        file << currentTimestamp() << "," << message << endl;
+        file.close();
+    }
+}
+
 int main() {
-    // Ім'я файлу для зберігання історії перемог
-    const string filename = "score.txt";
+    // Filename for storing win history
+    const string scoreFilename = "score.txt";
+    const string logFilename = "logs.csv";
+    const string jsonFilename = "wins.json";
 
-    // Зчитування історії перемог з файлу
-    Score score = readScoreFromFile(filename);
+    // Read win history from file
+    Score score = readScoreFromJson(jsonFilename);
 
-    // Ініціалізація пустої дошки
+    // Log game start
+    logToFile(logFilename, "User started the Game");
+
+    // Initialize an empty board
     char board[SIZE][SIZE] = {
         {' ', ' ', ' '},
         {' ', ' ', ' '},
         {' ', ' ', ' '}
     };
 
-    char currentPlayer = 'X';  // Починає гравець X
+    char currentPlayer = PLAYER_X;  // Player X starts
     bool gameOver = false;
 
     while (!gameOver) {
-        // Відображення дошки
+        // Display the board
         displayBoard(board);
 
-        // Запит ходу у поточного гравця
+        // Prompt the current player for a move
         int row, col;
         cout << "Player " << currentPlayer << ", enter your move (row and column): ";
         cin >> row >> col;
 
-        // Перевірка валідності ходу
-        if (row >= 0 && row < SIZE && col >= 0 && col < SIZE && board[row][col] == ' ') {
+        // Validate the move
+        if (isValidMove(row, col, board)) {
             board[row][col] = currentPlayer;
 
-            // Перевірка переможця
+            // Log the move
+            ostringstream moveLog;
+            moveLog << "User " << currentPlayer << " chose the (" << row + 1 << "," << col + 1 << ") cell";
+            logToFile(logFilename, moveLog.str());
+
+            // Check for a winner
             char winner = checkWinner(board);
             if (winner != ' ') {
                 displayBoard(board);
                 cout << "Player " << winner << " wins!" << endl;
-                if (winner == 'X') {
+                if (winner == PLAYER_X) {
                     score.xWins++;
                 }
                 else {
                     score.oWins++;
                 }
                 gameOver = true;
+
+                // Log the game result
+                logToFile(logFilename, string("Player ") + winner + " wins");
             }
             else if (isBoardFull(board)) {
                 displayBoard(board);
                 cout << "It's a draw!" << endl;
                 score.draws++;
                 gameOver = true;
+
+                // Log the game result
+                logToFile(logFilename, "It's a draw");
             }
-            else {т
-                // Зміна гравця
-                currentPlayer = (currentPlayer == 'X') ? 'O' : 'X';
+            else {
+                // Switch player
+                currentPlayer = (currentPlayer == PLAYER_X) ? PLAYER_O : PLAYER_X;
             }
         }
         else {
             cout << "Invalid move. Try again." << endl;
         }
+        cout << currentTimestamp() << endl;
     }
 
-    // Запис історії перемог у файл
-    writeScoreToFile(filename, score);
+    // Write win history to file
+    writeScoreToJson(jsonFilename, score);
 
-    // Відображення загальної історії перемог
+    // Display overall win history
     cout << "X wins: " << score.xWins << endl;
     cout << "O wins: " << score.oWins << endl;
     cout << "Draws: " << score.draws << endl;
