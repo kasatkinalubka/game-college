@@ -3,7 +3,7 @@
 #include <string>
 #include <ctime>
 #include <iomanip>
-#include <json/json.h>// и хде оно его должно взять? там ниже есть у меня, ко чат гпт писал
+#include <json/json.h>
 
 using namespace std;
 #pragma warning(disable : 4996)
